@@ -1,7 +1,14 @@
 #!/bin/bash
 
 # Configuration
-CHECK_INTERVAL=10  # Seconds between checks
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HANDLER_SCRIPT="$SCRIPT_DIR/auto_git_handler.sh"
+
+# Load Config
+if [ -f "$SCRIPT_DIR/config.env" ]; then
+    source "$SCRIPT_DIR/config.env"
+fi
+CHECK_INTERVAL=${CHECK_INTERVAL:-10}
 
 # Check if inside a git repository
 if [ ! -d .git ] && [ -z "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ]; then
@@ -9,56 +16,30 @@ if [ ! -d .git ] && [ -z "$(git rev-parse --is-inside-work-tree 2>/dev/null)" ];
     exit 1
 fi
 
-echo "🟢 Starting Gemini Auto-Commit. Press Ctrl+C to stop."
+echo "🟢 Starting Gemini Auto-Commit Monitor..."
 echo "📂 Monitoring directory: $(pwd)"
 
 # Trap Ctrl+C to exit gracefully
 trap "echo -e '\n🔴 Auto-commit stopped.'; exit 0" SIGINT
 
-while true; do
-    # Check for changes (staged or unstaged)
-    if [[ -n $(git status --porcelain) ]]; then
-        echo "----------------------------------------"
-        echo "📝 Changes detected at $(date '+%H:%M:%S'). Processing..."
-        
-        # Stage all changes
-        git add .
-        
-        # Get the diff for the prompt
-        # We limit the diff size to avoid token limits if files are huge
-        DIFF_CONTENT=$(git diff --staged | head -n 500)
-        
-        # Construct the prompt for Gemini
-        PROMPT="You are an automated git commit message generator. 
-        Analyze the following git diff and generate a single, concise commit message adhering to Conventional Commits.
-        IMPORTANT: Return ONLY the raw commit message string. Do not use Markdown formatting, do not use quotes, and do not provide explanations.
-        
-        Diff:
-        $DIFF_CONTENT"
-        
-        echo "🤖 Asking Gemini for a commit message..."
-        
-        # Call Gemini in non-interactive mode
-        # We capture the output. 
-        COMMIT_MSG=$(gemini "$PROMPT" 2>/dev/null)
-        
-        # Clean up the message (remove potential leading/trailing whitespace or quotes)
-        COMMIT_MSG=$(echo "$COMMIT_MSG" | sed -e 's/^"//' -e 's/"$//' -e s/^'//' -e s/'$//')
-        
-        # Fallback if Gemini returns empty (e.g., network error or refusal)
-        if [ -z "$COMMIT_MSG" ]; then
-            echo "⚠️  Gemini didn't return a message. Using timestamp fallback."
-            COMMIT_MSG="chore: auto-commit at $(date '+%Y-%m-%d %H:%M:%S')"
-        else
-            echo "✅ Generated message: $COMMIT_MSG"
-        fi
-        
-        # Commit
-        git commit -m "$COMMIT_MSG"
-        echo "🚀 Committed."
-        
-    fi
+# Check for fswatch (Mac/Linux)
+if command -v fswatch &> /dev/null; then
+    echo "⚡ Using fswatch for event-driven monitoring."
+    # Monitor for Created, Updated, Removed, Renamed events. 
+    # Excluding .git directory to avoid loops.
+    fswatch -o . -e ".*\.git/.*" --event Created --event Updated --event Removed --event Renamed | while read change_event; do
+        echo "🔔 File change detected. Triggering handler..."
+        bash "$HANDLER_SCRIPT"
+    done
+else
+    echo "⚠️  fswatch not found. Falling back to polling (Interval: ${CHECK_INTERVAL}s)."
+    echo "ℹ️  Install fswatch for better performance (e.g., 'brew install fswatch')."
     
-    # Wait for the next check
-    sleep $CHECK_INTERVAL
-done
+    while true; do
+        # Check for changes (staged or unstaged)
+        if [[ -n $(git status --porcelain) ]]; then
+           bash "$HANDLER_SCRIPT"
+        fi
+        sleep "$CHECK_INTERVAL"
+    done
+fi

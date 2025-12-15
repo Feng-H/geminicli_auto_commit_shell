@@ -4,6 +4,16 @@
 # Gemini Auto-Git Handler
 # ==========================================
 
+# Load Configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/config.env" ]; then
+    source "$SCRIPT_DIR/config.env"
+fi
+
+# Set defaults if not configured
+MAX_DIFF_LINES=${MAX_DIFF_LINES:-200}
+PROMPT_TEMPLATE=${PROMPT_TEMPLATE:-"You are an automated git commit message generator. Analyze the following git diff and generate a single, concise commit message adhering to Conventional Commits. Return ONLY the raw commit message string. Diff Content:"}
+
 # 1. Check if inside a git repository
 if [ ! -d .git ]; then
     echo "📂 No git repository detected."
@@ -30,21 +40,11 @@ echo "🤖 Gemini Auto-Commit Triggered"
 git add .
 
 # 3. Get Diff for LLM Analysis
-# Limit diff size to ~200 lines to keep it fast and within token limits
-DIFF_CONTENT=$(git diff --staged | head -n 200)
+# Limit diff size to keep it fast and within token limits
+DIFF_CONTENT=$(git diff --staged | head -n "$MAX_DIFF_LINES")
 
-# 4. Construct the Prompt (Optimized for Meaningful Context)
-PROMPT="You are an expert developer assistant. 
-Review the following 'git diff' from the user's current project.
-Generate a SINGLE, concise git commit message adhering to Conventional Commits (e.g., feat:, docs:, fix:, chore:).
-
-CRITICAL REQUIREMENTS:
-1. Do NOT write generic messages like 'update file' or 'modify text'.
-2. FOCUS ON THE CONTENT: What knowledge was added? What logic changed?
-3. If it's a resume/markdown file, mention specifically what section or info was updated.
-4. Return ONLY the raw commit message string. No quotes, no markdown, no explanations.
-
-Diff Content:
+# 4. Construct the Prompt
+PROMPT="$PROMPT_TEMPLATE
 $DIFF_CONTENT"
 
 echo "📝 Analyzing changes for context..."
