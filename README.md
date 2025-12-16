@@ -11,8 +11,8 @@
 
 ## 功能特性
 
+- **无感集成**: 自动 Hook `gemini` 命令，执行任意 Gemini 操作后尝试自动提交。
 - **智能提交信息**: 分析 `git diff` 生成有意义的提交记录（如 `feat:`, `fix:`）。
-- **安全无冲突**: 采用独立命令 `gemini_auto_commit` 触发，不干扰原有 CLI 环境。
 - **自动初始化**: 如果目录没有 git 仓库，尝试自动初始化。
 - **实时监控 (可选)**: 提供后台监控脚本，保存即提交。
 
@@ -36,22 +36,23 @@ bash install.sh
 ```
 
 脚本会自动检测路径并将配置写入你的 `~/.zshrc` 或 `~/.bashrc`。
-安装完成后，请执行 `source ~/.zshrc` 使配置生效。
+安装完成后，请执行 `source ~/.zshrc` (或 `source ~/.bashrc`) 使配置生效。
 
 ### 3. 使用方法
 
-#### 方式一：手动触发 (推荐)
+#### 方式一：命令行触发 (默认)
 
-在任何 Git 项目目录下，当你完成工作想要提交时，只需输入：
+安装脚本会创建一个 `gemini` 函数包装器。
+在任何 Git 项目目录下，当你运行 **任意 gemini 命令** 时（例如 `gemini chat` 或单纯调用 `gemini`），程序会在命令结束后自动检查变更并提交。
 
 ```bash
-gemini_auto_commit
+gemini
 ```
 
 程序会自动：
-1. 检测变更。
-2. 分析 Diff。
-3. 调用 Gemini 生成语义化 Commit Message。
+1. 执行原 `gemini` 命令。
+2. 检测 Git 变更。
+3. 分析 Diff 并调用 Gemini 生成 Commit Message。
 4. 执行提交。
 
 #### 方式二：后台实时监控

@@ -23,7 +23,7 @@ This session addressed and resolved a critical parse error encountered during th
 3.  **Update of `install.sh`:**
     *   The `install.sh` script, located in the project directory, was modified to prevent recurrence of the `.zshrc` generation issue.
     *   The `CONFIG_BLOCK` string within `install.sh` was updated to correctly generate the `gemini_auto_commit` function, addressing:
-        *   The erroneous trailing backslash after `local exit_code=\\$?` which caused line joining.
+        *   The erroneous trailing backslash after `local exit_code=\\\$?` which caused line joining.
         *   Proper newline handling for the `echo` statements.
         *   Inclusion of the closing brace `}` in the generated function definition.
 
@@ -59,7 +59,21 @@ Resolved an issue where the auto-commit feature failed to load because the user 
 ### Next Steps:
 *   User needs to run `source ~/.bash_profile` (since they are in Bash) to activate the feature.
 
+## Date: 2025年12月16日 (Session 3)
 
+### Summary of Changes:
+
+Updated documentation and configuration to reflect the current state of the project.
+
+### Key Actions Taken:
+
+1.  **Updated `README.md`**:
+    *   Reflected the new "Wrapper" behavior: the installation now wraps the `gemini` command to trigger auto-commits automatically after execution, replacing the old manual `gemini_auto_commit` alias.
+    *   Updated the "Usage" section to explain that running `gemini` triggers the workflow.
+
+2.  **Created `.gitignore`**:
+    *   Added `.gitignore` to the project root.
+    *   Ignored `GEMINI.md` to prevent this log file from being synchronized to the git repository.
 
 ---
 **Note:** The `install.sh` file was previously untracked by Git; it is recommended to add it to the repository.
