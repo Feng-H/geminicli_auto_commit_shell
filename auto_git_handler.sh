@@ -16,16 +16,8 @@ PROMPT_TEMPLATE=${PROMPT_TEMPLATE:-"You are an automated git commit message gene
 
 # 1. Check if inside a git repository
 if [ ! -d .git ]; then
-    echo "📂 No git repository detected."
-    # Check if directory is not empty
-    if [ "$(ls -A .)" ]; then
-        echo "✨ Initializing new Git repository..."
-        git init
-        # First commit needs to allow empty just in case, but usually we have files
-    else
-        echo "Directory is empty. Skipping git init."
-        exit 0
-    fi
+    # echo "📂 No git repository detected. Skipping."
+    exit 0
 fi
 
 # 2. Check for changes (staged or unstaged)
@@ -55,6 +47,16 @@ COMMIT_MSG=$(gemini "$PROMPT" 2>/dev/null)
 
 # Clean up output (remove quotes if LLM adds them)
 COMMIT_MSG=$(echo "$COMMIT_MSG" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")
+
+# Security Check: Abort if LLM flagged sensitive info
+if [[ "$COMMIT_MSG" == *"SECURITY_ALERT"* ]]; then
+    echo "🚨 Security Alert Triggered!"
+    echo "The AI detected potential sensitive information in your changes."
+    echo "Message from AI: $COMMIT_MSG"
+    echo "❌ Commit aborted. Staged changes have been reset."
+    git reset
+    exit 1
+fi
 
 # Fallback if generation failed
 if [ -z "$COMMIT_MSG" ]; then
