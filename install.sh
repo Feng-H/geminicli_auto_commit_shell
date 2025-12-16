@@ -22,7 +22,29 @@ if [ ! -f "$HANDLER_SCRIPT" ]; then
     exit 1
 fi
 
-# 2. Define Wrapper
+# 3. Detect Shell Correctly
+# Check if a target file is provided as an argument
+if [ -n "$1" ]; then
+    TARGET_FILE="$1"
+elif [ -n "$ZSH_VERSION" ]; then
+    TARGET_FILE="$HOME/.zshrc"
+elif [[ "$SHELL" == *"zsh"* ]]; then
+    TARGET_FILE="$HOME/.zshrc"
+elif [ -n "$BASH_VERSION" ]; then
+    if [ -f "$HOME/.bash_profile" ]; then
+        TARGET_FILE="$HOME/.bash_profile"
+    else
+        TARGET_FILE="$HOME/.bashrc"
+    fi
+else
+    # Fallback
+    TARGET_FILE="$HOME/.zshrc"
+fi
+
+echo "🎯 Targeted Config File: $TARGET_FILE"
+
+# 2. Define Wrapper (Fixing escapes)
+# We use single quotes for the inner logic to avoid excessive escaping hell
 CONFIG_BLOCK="
 # ==========================================
 # Gemini CLI Wrapper (Auto-Commit)
@@ -30,47 +52,16 @@ CONFIG_BLOCK="
 # ==========================================
 gemini() {
     \"$GEMINI_BIN_PATH\" \"\$@\"
-    local exit_code=\\$?\
+    local exit_code=\$?
 
     if [ -d .git ] || git rev-parse --git-dir > /dev/null 2>&1; then
         if [ -f \"$HANDLER_SCRIPT\" ]; then
             bash \"$HANDLER_SCRIPT\"
         fi
     fi
-    return \\$exit_code
+    return \$exit_code
 }
 "
-
-# 3. Detect Shell Correctly
-# We use ps to find the name of the parent process (the shell)
-CURRENT_SHELL=$(ps -p $$ -o comm=) 
-# If that fails or is just 'bash' (from the script itself), we check parent of parent or just assume based on user invoking it.
-# Simpler: check if $BASH_VERSION is set (since we are running this with bash, it always is). 
-# We rely on the USER's interactive shell.
-
-# Strategy: Check if the user passed an argument, otherwise guess.
-# Since the script is run via 'bash install.sh', $0 is bash. 
-# We'll check the config files existence and prioritize.
-
-if [ -n "$ZSH_VERSION" ]; then
-    TARGET_FILE="$HOME/.zshrc"
-elif [ -n "$BASH_VERSION" ]; then
-    # We are running IN bash, but are we configuring FOR bash?
-    # If the user is in a bash shell (ps check), use bash profile.
-    PARENT_SHELL=$(ps -o comm= -p $PPID)
-    if [[ "$PARENT_SHELL" == *"zsh"* ]]; then
-         TARGET_FILE="$HOME/.zshrc"
-    else
-         # Default to bash profile if parent is bash or we can't tell
-         if [ -f "$HOME/.bash_profile" ]; then
-            TARGET_FILE="$HOME/.bash_profile"
-         else
-            TARGET_FILE="$HOME/.bashrc"
-         fi
-    fi
-fi
-
-echo "🎯 Targeted Config File: $TARGET_FILE"
 
 # 4. Clean & Install
 if grep -q "gemini() {" "$TARGET_FILE"; then
