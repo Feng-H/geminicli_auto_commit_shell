@@ -1,4 +1,4 @@
-# Gemini Auto-Commit Feature (自动提交助手)
+# Gemini Auto-Commit Shell (自动提交脚本)
 
 本项目提供基于 Gemini (LLM) 的自动化 Git 提交功能。它能自动检测文件变更，并根据 diff 内容生成符合 Conventional Commits 规范的提交信息。
 
@@ -6,7 +6,7 @@
 
 - `install.sh`: **一键安装脚本**。自动将命令添加到你的 Shell 配置文件中。
 - `auto_git_handler.sh`: **核心处理脚本**。执行一次完整的流程：检测变更 -> git add -> 生成 commit message -> git commit。
-- `git_monitor.sh`: **监控脚本**。负责监听文件变动（支持 `fswatch` 事件驱动或轮询模式），并调用核心脚本。
+
 - `config.env`: **配置文件**。定义检测频率、Prompt 模板等。
 
 ## 功能特性
@@ -21,11 +21,6 @@
 ### 1. 依赖检查
 
 核心功能依赖 `gemini` 命令行工具（即当前 CLI 环境）。
-推荐安装 `fswatch` 以获得最佳监控体验（macOS）：
-
-```bash
-brew install fswatch
-```
 
 ### 2. 一键安装
 
@@ -55,16 +50,7 @@ gemini
 3. 分析 Diff 并调用 Gemini 生成 Commit Message。
 4. 执行提交。
 
-#### 方式二：后台实时监控
 
-如果你希望在写代码时自动保存（类似 IDE 的自动保存，但带版本控制）：
-
-```bash
-./git_monitor.sh
-```
-
-- 如果安装了 `fswatch`，它会监听文件事件，响应速度快。
-- 如果没有，它会每隔 10 秒（可配置）轮询一次。
 
 ## 高级配置
 
