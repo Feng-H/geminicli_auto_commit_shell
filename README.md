@@ -18,11 +18,29 @@
 
 ## 快速开始
 
-### 1. 依赖检查
+### 1. 一键安装
 
-核心功能依赖 `gemini` 命令行工具（即当前 CLI 环境）。
+为了确保本项目的正常运行，请先安装以下依赖：
 
-### 2. 一键安装
+### 1. Gemini CLI
+
+核心功能依赖于 `gemini` 命令行工具。请确保您已安装并配置好 Gemini CLI。如果您尚未安装，请通过以下命令进行安装：
+
+```bash
+pip install gemini-cli
+# 或者，如果您使用的是 conda 环境
+# conda install -c conda-forge gemini-cli
+```
+安装完成后，请确保您已登录并配置好 Gemini API 密钥。
+
+### 2. Git
+
+本项目是一个 Git 自动提交工具，因此需要您已经安装 Git 并熟练使用。
+
+```bash
+# 如果您尚未安装 Git，可以通过以下命令安装 (以 macOS 为例)
+brew install git
+```
 
 在当前目录下运行安装脚本：
 
