@@ -56,14 +56,21 @@ bash install.sh
 #### 方式一：命令行触发 (默认)
 
 安装脚本会创建一个 `gemini` 函数包装器。
-在任何 Git 项目目录下，当你运行 **任意 gemini 命令** 时（例如 `gemini chat` 或单纯调用 `gemini`），程序会在命令结束后自动检查变更并提交。
+在任何 Git 项目目录下，当你运行 **任意 gemini 命令** 时（例如 `gemini chat` 或单纯调用 `gemini`）：
+
+1. **首先执行 Gemini 命令**：你正常使用 Gemini CLI（如果是交互模式，就在你退出交互模式后）。
+2. **随后触发自动提交**：Gemini 进程结束后，脚本会自动检查当前目录的 Git 变更并提交。
 
 ```bash
 gemini
+# 此时进入 Gemini 交互模式...
+# 做了一些操作...
+# 退出交互模式 (exit)
+# -> 自动触发 Git 提交流程
 ```
 
-程序会自动：
-1. 执行原 `gemini` 命令。
+程序流程：
+1. 执行原 `gemini` 命令 (等待用户操作结束)。
 2. 检测 Git 变更。
 3. 分析 Diff 并调用 Gemini 生成 Commit Message。
 4. 执行提交。
