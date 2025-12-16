@@ -1,4 +1,4 @@
-# Gemini Auto-Commit Shell (自动提交脚本)
+# Gemini Auto-Commit Shell (自动git commit提交脚本)
 
 本项目提供基于 Gemini (LLM) 的自动化 Git 提交功能。它能自动检测文件变更，并根据 diff 内容生成符合 Conventional Commits 规范的提交信息。
 
@@ -68,4 +68,4 @@ gemini
 
 ## 关联项目
 
-本项目设计用于配合 **Work Report Generator** 使用。通过生成高质量的提交记录，后续可自动生成工作周报/日报。
+本项目设计用于配合 **Work Report Generator** (项目还在初版,还没有提交github)使用。通过生成高质量的提交记录，后续可自动生成工作周报/日报。()
