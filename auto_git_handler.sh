@@ -13,6 +13,7 @@ fi
 # Set defaults if not configured
 MAX_DIFF_LINES=${MAX_DIFF_LINES:-200}
 COMMIT_LANGUAGE=${COMMIT_LANGUAGE:-en}
+AUTO_INIT=${AUTO_INIT:-true}
 
 # Define Prompts
 PROMPT_EN="You are an automated git commit message generator. Analyze the following git diff and generate a single, concise commit message adhering to Conventional Commits.
@@ -42,10 +43,15 @@ if [ -z "$PROMPT_TEMPLATE" ]; then
     fi
 fi
 
-# 1. Check if inside a git repository
-if [ ! -d .git ]; then
-    # echo "📂 No git repository detected. Skipping."
-    exit 0
+# 1. Check if inside a git repository, init if needed
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    if [ "$AUTO_INIT" = "true" ]; then
+        echo "📂 No git repository detected. Initializing new repository..."
+        git init
+    else
+        # echo "📂 No git repository detected. Skipping."
+        exit 0
+    fi
 fi
 
 # 2. Check for changes (staged or unstaged)
