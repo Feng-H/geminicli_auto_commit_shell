@@ -12,7 +12,35 @@ fi
 
 # Set defaults if not configured
 MAX_DIFF_LINES=${MAX_DIFF_LINES:-200}
-PROMPT_TEMPLATE=${PROMPT_TEMPLATE:-"You are an automated git commit message generator. Analyze the following git diff and generate a single, concise commit message adhering to Conventional Commits. Return ONLY the raw commit message string. Diff Content:"}
+COMMIT_LANGUAGE=${COMMIT_LANGUAGE:-en}
+
+# Define Prompts
+PROMPT_EN="You are an automated git commit message generator. Analyze the following git diff and generate a single, concise commit message adhering to Conventional Commits.
+Requirements:
+1. Format: <type>(<scope>): <subject>
+2. Security: Check for sensitive data (API keys, passwords). If found, return ONLY 'SECURITY_ALERT: Found potential sensitive data.'.
+3. Content: Brief explanation of changes.
+Return ONLY the raw commit message string. Diff Content:"
+
+PROMPT_ZH="你是一个专业的代码审查和 Git 提交消息生成助手。请分析以下 git diff 内容，生成符合 Conventional Commits 规范的提交信息。
+要求如下：
+1. **格式**：<type>(<scope>): <subject>
+
+<body>
+2. **语言**：标题和正文必须严格使用【中文】。
+3. **标题**：简洁明了，概括核心变更。
+4. **正文**：详细说明变更的原因和影响。
+5. **安全性**：如果发现敏感信息（API Key、密码等），仅返回 'SECURITY_ALERT: Found potential sensitive data.' 并停止。
+只返回最终的提交消息内容，不要包含 Markdown 代码块。
+Diff Content:"
+
+if [ -z "$PROMPT_TEMPLATE" ]; then
+    if [ "$COMMIT_LANGUAGE" == "zh-CN" ]; then
+        PROMPT_TEMPLATE="$PROMPT_ZH"
+    else
+        PROMPT_TEMPLATE="$PROMPT_EN"
+    fi
+fi
 
 # 1. Check if inside a git repository
 if [ ! -d .git ]; then
