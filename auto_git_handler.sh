@@ -23,16 +23,36 @@ Requirements:
 3. Content: Brief explanation of changes.
 Return ONLY the raw commit message string. Diff Content:"
 
-PROMPT_ZH="你是一个专业的代码审查和 Git 提交消息生成助手。请分析以下 git diff 内容，生成符合 Conventional Commits 规范的提交信息。
-要求如下：
-1. **格式**：<type>(<scope>): <subject>
+PROMPT_ZH="你是一个项目进度记录员。请根据 git diff 生成一条用于【自动生成工作日报】的 git 提交信息。
 
-<body>
-2. **语言**：标题和正文必须严格使用【中文】。
-3. **标题**：简洁明了，概括核心变更。
-4. **正文**：详细说明变更的原因和影响。
-5. **安全性**：如果发现敏感信息（API Key、密码等），仅返回 'SECURITY_ALERT: Found potential sensitive data.' 并停止。
-只返回最终的提交消息内容，不要包含 Markdown 代码块。
+要求如下：
+1. **格式**：
+   <type>(<scope>): <subject>
+
+   <分类图标> <详细描述点1>
+   <分类图标> <详细描述点2>
+
+2. **内容原则**：
+   - **Type** 仅限：feat, fix, docs, style, refactor, perf, test, chore。
+   - **Subject**：一句话概括核心产出（如\"完成用户登录接口\"）。
+   - **Body**：必须使用无序列表。每一项描述必须包含**业务语境**（解释做了什么功能，而不仅仅是改了代码）。
+   - **图标前缀**（用于日报分类，必须使用）：
+     ✨ (新增功能)
+     🐛 (Bug修复)
+     🔧 (常规维护/重构)
+     📝 (文档更新)
+
+3. **示例**：
+   feat(auth): 集成微信登录功能
+
+   ✨ 新增微信 OAuth2.0 授权流程
+   🔧 重构用户 Session 存储逻辑以支持多端登录
+   📝 更新 API 文档中的登录接口参数说明
+
+4. **安全性**：若发现敏感信息（API Key/密码），仅返回 'SECURITY_ALERT: Found potential sensitive data.'。
+
+5. **输出**：只返回最终消息字符串，不要包含 Markdown 代码块。
+
 Diff Content:"
 
 if [ -z "$PROMPT_TEMPLATE" ]; then
