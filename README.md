@@ -1,5 +1,7 @@
 # Gemini Auto-Commit (自动 Git 提交助手)
 
+> [Read in English](./README_EN.md)
+
 本项目是一个 Shell 插件，能够为 `gemini` 命令行工具无缝集成 **自动 Git 提交** 功能。
 当你使用 `gemini` 完成代码生成或问答后，本插件会自动检测当前目录的文件变更，利用 Gemini 模型生成符合 Conventional Commits 规范的提交信息，并自动执行提交。
 
@@ -22,7 +24,7 @@
 
 确保你的系统中已安装以下工具，并且在 PATH 中可用：
 
-*   **Gemini CLI**: 必须安装 `gemini` 命令行工具。
+*   **Gemini CLI**: 必须安装 `gemini` 命令行工具 (安装指南: https://geminicli.com)。
     *   验证方式: 在终端运行 `type gemini` 或 `which gemini`，应输出路径。
 *   **Git**: 版本建议 >= 2.0。
 
