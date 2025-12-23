@@ -22,6 +22,8 @@ if [ ! -f "$HANDLER_SCRIPT" ]; then
     exit 1
 fi
 
+chmod +x "$HANDLER_SCRIPT"
+
 # 3. Detect Shell Correctly
 # Check if a target file is provided as an argument
 if [ -n "$1" ]; then
