@@ -68,6 +68,10 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     if [ "$AUTO_INIT" = "true" ]; then
         echo "📂 No git repository detected. Initializing new repository..."
         git init
+        if [ $? -ne 0 ]; then
+            echo "❌ Error: 'git init' failed."
+            exit 1
+        fi
     else
         # echo "📂 No git repository detected. Skipping."
         exit 0
@@ -75,7 +79,8 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 # 2. Check for changes (staged or unstaged)
-if [[ -z $(git status --porcelain) ]]; then
+# Use head -n 1 to avoid loading massive status output for large projects
+if [[ -z $(git status --porcelain | head -n 1) ]]; then
     exit 0
 fi
 
@@ -83,7 +88,12 @@ echo "----------------------------------------"
 echo "🤖 Gemini Auto-Commit Triggered"
 
 # Stage all changes
-git add .
+echo "📦 Staging files..."
+git add -A
+if [ $? -ne 0 ]; then
+    echo "❌ Error: 'git add' failed."
+    exit 1
+fi
 
 # 3. Get Diff for LLM Analysis
 # Limit diff size to keep it fast and within token limits
